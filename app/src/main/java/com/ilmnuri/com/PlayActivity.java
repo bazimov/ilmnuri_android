@@ -38,18 +38,13 @@ import butterknife.OnClick;
 
 public class PlayActivity extends BaseActivity {
 
-//    private  String audioPath = Environment.getExternalStorageDirectory().toString() + "/sample.mp3";
-
-
     public static final int DIALOG_DOWNLOAD_PROGRESS = 0;
-
-    private Context mContext;
 
     private ImageView imageView;
 
     private TextView tvTitle;
     private int currentCategory;
-    private String url, trackPath;
+    private String trackPath;
     private String fileName;
     private File dir;
     boolean readExternalStoragePermission;
@@ -76,7 +71,6 @@ public class PlayActivity extends BaseActivity {
         }
 
         if (Utils.checkFileExist(dir.getPath() + "/" + fileName)) {
-//            playAudio();
             if (readExternalStoragePermission) {
                 initMediaPlayer();
             }
@@ -128,7 +122,7 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void initVariables() {
-        mContext = this;
+        Context mContext = this;
         dir = new File(Environment.getExternalStorageDirectory(), "/ilmnuri");
         boolean isDirectoryCreated=dir.exists();
         if (!isDirectoryCreated) {
@@ -140,7 +134,7 @@ public class PlayActivity extends BaseActivity {
 
         readExternalStoragePermission = false;
         trackPath = getIntent().getStringExtra("url");
-        url = Api.BaseUrl + trackPath;
+        String url = Api.BaseUrl + trackPath;
         fileName = url.substring(url.lastIndexOf('/') + 1);
         String catetory = getIntent().getStringExtra("category");
 
@@ -236,13 +230,6 @@ public class PlayActivity extends BaseActivity {
 
             }
         });
-//
-//        btnStart.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//            }
-//        });
         if (mediaPlayer != null) {
             play();
         }
@@ -252,10 +239,18 @@ public class PlayActivity extends BaseActivity {
     @OnClick(R.id.media_play)
     void playAudio() {
         if (mediaPlayer.isPlaying()) {
-            btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_play));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_play));
+            } else {
+                btnStart.setBackgroundResource(R.drawable.play_jelly);
+            }
             mediaPlayer.pause();
         } else {
-            btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
+            } else {
+                btnStart.setBackgroundResource(R.drawable.pause_jelly);
+            }
             play();
         }
     }
