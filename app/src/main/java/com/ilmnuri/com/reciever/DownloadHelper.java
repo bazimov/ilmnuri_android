@@ -95,7 +95,7 @@ public class DownloadHelper extends Service {
                                     if (specialFeedItem.get(enqueue) != null) {
                                         Audio audio1 = specialFeedItem.get(enqueue);
                                         specialFeedItem.get(enqueue).setDownloaded(true);
-                                        EventBus.getDefault().post(AudioEvent.stop(audio1));
+                                        EventBus.getDefault().post(AudioEvent.stop_download(audio1));
                                         counter++;
                                     }
 
@@ -110,7 +110,8 @@ public class DownloadHelper extends Service {
                         }
                     } finally {
                         if (specialFeedItem.size() == counter) {
-                            EventBus.getDefault().post(AudioEvent.update());
+                            EventBus.getDefault().post(AudioEvent.update_download()
+                            );
                             Log.d("Service ", " is done his job ");
                         }
                     }

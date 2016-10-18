@@ -1,11 +1,9 @@
 package com.ilmnuri.com;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,8 +22,13 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.ilmnuri.com.event.AudioEvent;
 import com.ilmnuri.com.model.Api;
 import com.ilmnuri.com.model.Category;
+import com.ilmnuri.com.model.Global;
+import com.ilmnuri.com.service.NotificationService;
+import com.ilmnuri.com.utility.Constants;
+import com.ilmnuri.com.utility.MediaCenter;
 import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
@@ -34,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 
 public class PlayActivity extends BaseActivity {
@@ -45,34 +49,42 @@ public class PlayActivity extends BaseActivity {
     private TextView tvTitle;
     private int currentCategory;
     private String trackPath;
+    private String url;
     private String fileName;
     private File dir;
     boolean readExternalStoragePermission;
-    DownloadManager downloadManager;
+    MediaCenter mc;
+    public TextView duration;
+    private double timeElapsed = 0, finalTime = 0;
+    private Handler durationHandler = new Handler();
+    private SeekBar seekbar;
+    private String albumModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
 
         initVariables();
-        chechReadStoragePermission();
+        checkReadStoragePermission();
         initUI();
 
         dir = new File(Environment.getExternalStorageDirectory(), "/ilmnuri");
-        boolean isDirectoryCreated=dir.exists();
+        boolean isDirectoryCreated = dir.exists();
         if (!isDirectoryCreated) {
-            isDirectoryCreated= dir.mkdirs();
+            isDirectoryCreated = dir.mkdirs();
         }
-        if(isDirectoryCreated) {
+        if (isDirectoryCreated) {
             Log.d("mkdirs option", "Directory already exists.");
         }
 
         if (Utils.checkFileExist(dir.getPath() + "/" + fileName)) {
             if (readExternalStoragePermission) {
                 initMediaPlayer();
+                startService();
             }
 
         } else {
@@ -83,7 +95,30 @@ public class PlayActivity extends BaseActivity {
         }
     }
 
-    private void chechReadStoragePermission() {
+    public void startService() {
+        Intent serviceIntent = new Intent(PlayActivity.this, NotificationService.class);
+        serviceIntent.putExtra("song_title", fileName);
+        serviceIntent.putExtra("url", trackPath);
+        serviceIntent.putExtra("album_body", albumModel);
+        serviceIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+        startService(serviceIntent);
+    }
+
+
+    public void onEvent(AudioEvent event) {
+        if (event.getType() == AudioEvent.Type.SHOW_NOTIFICATION) {
+            if (mc.isPlaying(String.valueOf(Uri.parse(dir.getPath() + "/" + Global.getInstance().getCurrentPlayingSong())))) {
+                mc.pauseAudio();
+            }  else {
+                mc.resumeAudio();
+            }
+
+        }else if (event.getType() == AudioEvent.Type.CLOSE_PLAYER) {
+            mc.killMediaPlayer();
+        }
+    }
+
+    private void checkReadStoragePermission() {
         int permissinCheck = 0;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             permissinCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -122,18 +157,19 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void initVariables() {
-        Context mContext = this;
+        mc = MediaCenter.getInstance();
         dir = new File(Environment.getExternalStorageDirectory(), "/ilmnuri");
-        boolean isDirectoryCreated=dir.exists();
+        boolean isDirectoryCreated = dir.exists();
         if (!isDirectoryCreated) {
-            isDirectoryCreated= dir.mkdirs();
+            isDirectoryCreated = dir.mkdirs();
         }
-        if(isDirectoryCreated) {
+        if (isDirectoryCreated) {
             Log.d("mkdirs option", "Directory already exists.");
         }
 
         readExternalStoragePermission = false;
         trackPath = getIntent().getStringExtra("url");
+        albumModel = getIntent().getStringExtra("album_body");
         String url = Api.BaseUrl + trackPath;
         fileName = url.substring(url.lastIndexOf('/') + 1);
         String catetory = getIntent().getStringExtra("category");
@@ -146,12 +182,13 @@ public class PlayActivity extends BaseActivity {
             currentCategory = 2;
         }
 
+        Global.getInstance().setCurrentPlayingSong(fileName);
     }
 
     private void initUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if(getSupportActionBar() != null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         if (toolbar != null) {
@@ -190,20 +227,16 @@ public class PlayActivity extends BaseActivity {
     }
 
     ////play music===============start
-    private MediaPlayer mediaPlayer;
-    public TextView duration;
-    private double timeElapsed = 0, finalTime = 0;
-    private Handler durationHandler = new Handler();
-    private SeekBar seekbar;
+
     @Bind(R.id.media_play)
     View btnStart;
 
     public void initMediaPlayer() {
-        mediaPlayer = MediaPlayer.create(this, Uri.parse(dir.getPath() + "/" + fileName));
-        mediaPlayer.setOnCompletionListener(mOnCompletionListener);
-        finalTime = mediaPlayer.getDuration();
         duration = (TextView) findViewById(R.id.songDuration);
         seekbar = (SeekBar) findViewById(R.id.seekBar);
+        play();
+
+        finalTime = mc.totalDuration();
 
         if (seekbar != null) {
             seekbar.setMax((int) finalTime);
@@ -216,7 +249,7 @@ public class PlayActivity extends BaseActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     seekBar.setProgress(progress);
-                    mediaPlayer.seekTo(progress);
+//                    mc.seekTo(progress);
                 }
             }
 
@@ -227,53 +260,45 @@ public class PlayActivity extends BaseActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                MediaCenter.getInstance().playCurrentPosition(seekBar);
+//                updateProgress();
             }
         });
-        if (mediaPlayer != null) {
-            play();
-        }
 
     }
 
     @OnClick(R.id.media_play)
     void playAudio() {
-        if (mediaPlayer.isPlaying()) {
+        if (mc.isPlaying(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName)))) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_play));
             } else {
                 btnStart.setBackgroundResource(R.drawable.play_jelly);
             }
-            mediaPlayer.pause();
+            mc.pauseAudio();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 btnStart.setBackground(getResources().getDrawable(android.R.drawable.ic_media_pause));
             } else {
                 btnStart.setBackgroundResource(R.drawable.pause_jelly);
             }
-            play();
+            mc.resumeAudio();
         }
     }
 
     // play mp3 song
     public void play() {
-        mediaPlayer.start();
-        timeElapsed = mediaPlayer.getCurrentPosition();
+        mc.playAudio(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName)));
+        timeElapsed = mc.getCurrentTimePosition();
         seekbar.setProgress((int) timeElapsed);
         durationHandler.postDelayed(updateSeekBarTime, 100);
     }
 
-    private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(MediaPlayer mp) {
-//            killMediaPlayer();
-        }
-    };
     //handler to change seekBarTime
     private Runnable updateSeekBarTime = new Runnable() {
         public void run() {
             //get current position
-            timeElapsed = mediaPlayer.getCurrentPosition();
+            timeElapsed = mc.getCurrentTimePosition();
 
             //set seekbar progress
             seekbar.setProgress((int) timeElapsed);
@@ -286,45 +311,20 @@ public class PlayActivity extends BaseActivity {
         }
     };
 
-    private void killMediaPlayer() {
-        durationHandler.removeCallbacks(updateSeekBarTime);
-        if (mediaPlayer != null) {
-            try {
-                mediaPlayer.reset();
-                mediaPlayer.release();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     // pause mp3 song
     public void pause(View view) {
-        mediaPlayer.pause();
+        mc.pauseAudio();
     }
 
     // go forward at forwardTime seconds
     public void forward(View view) {
-        //check if we can go forward at forwardTime seconds before song endes
-        int forwardTime = 2000;
-        if ((timeElapsed + forwardTime) <= finalTime) {
-            timeElapsed = timeElapsed + forwardTime;
-
-            //seek to the exact second of the track
-            mediaPlayer.seekTo((int) timeElapsed);
-        }
+        mc.forwardAudio();
     }
 
     // go backwards at backwardTime seconds
     public void rewind(View view) {
-        //check if we can go back at backwardTime seconds after song starts
-        int backwardTime = 2000;
-        if ((timeElapsed - backwardTime) > 0) {
-            timeElapsed = timeElapsed - backwardTime;
-
-            //seek to the exact second of the track
-            mediaPlayer.seekTo((int) timeElapsed);
-        }
+        mc.backwardAudio();
     }
 
     /////////////////end
@@ -333,10 +333,10 @@ public class PlayActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if (readExternalStoragePermission) {
-            if (mediaPlayer != null)
-                killMediaPlayer();
-        }
+//        if (readExternalStoragePermission) {
+//            if (mc != null)
+//                mc.killMediaPlayer();
+//        }
 
     }
 
@@ -358,5 +358,8 @@ public class PlayActivity extends BaseActivity {
         return true;
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

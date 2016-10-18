@@ -38,9 +38,8 @@ public class AboutUsActivity extends AppCompatActivity {
                     "Barcha mualliflik huquqlari ma'ruzalarning voizlariga tegishlidir! " +
                     "Alloh olayotgan ilmimizning nuri ila hayot yo'limizni munavvar qilsin!\n\n" +
                     "Texnik nosozliklar haqida bizga xabar qiling.\n\n" +
-                    "Telegramda: http://telegram.me/ilmnuri_apps\n" +
                     "e-mail: ilmnuri@ilmnuri.com\n\n" +
-                    "--Team ilmnuri\nwww.ilmnuri.com\n\n3.1 versiya\nMay 23, 2016";
+                    "-- Ilmnuri faollari\nwww.ilmnuri.com\n\n3.2 versiya\nOct 18, 2016";
             tvAboutUs.setText(aboutUs);
         } catch (Exception e) {
             e.printStackTrace();

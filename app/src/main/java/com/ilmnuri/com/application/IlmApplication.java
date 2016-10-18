@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.ilmnuri.com.api.IlmApi;
 import com.ilmnuri.com.module.MainModule;
+import com.ilmnuri.com.utility.MediaCenter;
 
 import javax.inject.Inject;
 
@@ -17,15 +18,21 @@ public class IlmApplication extends Application {
     @Inject
     IlmApi mApi;
     public boolean isViewed;
+    public static IlmApplication sIlmApplication;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
         mObjectGraph = ObjectGraph.create(new MainModule(this));
         inject(this);
+        MediaCenter.initInstance(this);
 
     }
 
+    public static IlmApplication getInstanse() {
+        return sIlmApplication;
+    }
 
     public void inject(Object object) {
         try {
@@ -34,6 +41,7 @@ public class IlmApplication extends Application {
             e.printStackTrace();
         }
     }
+
 
     public boolean isViewed() {
         return isViewed;

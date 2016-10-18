@@ -7,6 +7,7 @@ public class Global {
 
     private static Global instance;
     ArrayList<AlbumModel> arrayList;
+    private String currentPlayingSong;
 
     private int current_position;
     Audio mAudio;
@@ -67,5 +68,13 @@ public class Global {
 
     public void setCurrent_position(int current_position) {
         this.current_position = current_position;
+    }
+
+    public String getCurrentPlayingSong() {
+        return currentPlayingSong;
+    }
+
+    public void setCurrentPlayingSong(String currentPlayingSong) {
+        this.currentPlayingSong = currentPlayingSong;
     }
 }

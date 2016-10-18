@@ -2,19 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.ilmnuri.com">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
-    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.ilmnuri.com.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"/>
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="com.ilmnuri.com.permission.C2D_MESSAGE"/>
 
     <permission
         android:name="com.ilmnuri.com.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+        android:protectionLevel="signature"/>
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
 
     <application
         android:name=".application.IlmApplication"
@@ -64,16 +64,16 @@
         <activity
             android:name=".PermDenied"
             android:label="@string/title_activity_perm_denied"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"/>
 
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
 
-                <category android:name="com.example.gcm" />
+                <category android:name="com.example.gcm"/>
             </intent-filter>
         </receiver>
 
@@ -81,24 +81,26 @@
             android:name=".MyGcmListenerService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
             </intent-filter>
         </service>
         <service
             android:name=".MyInstanceIDListenerService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID" />
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
             </intent-filter>
         </service>
         <service
             android:name=".RegistrationIntentService"
-            android:exported="false" />
+            android:exported="false"/>
+
+        <service android:name=".service.NotificationService"/>
 
         <activity
             android:name=".WebViewActivity"
             android:label="@string/title_activity_web_view"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"/>
 
         <service
             android:name=".reciever.DownloadHelper"

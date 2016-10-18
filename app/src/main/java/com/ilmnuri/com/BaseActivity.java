@@ -8,12 +8,23 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.ilmnuri.com.api.IlmApi;
 import com.ilmnuri.com.application.IlmApplication;
+import com.ilmnuri.com.utility.CacheUtils;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 
 public class BaseActivity extends AppCompatActivity {
+    @Inject
+    IlmApi mApi;
+
+    @Inject
+    CacheUtils mCacheUtils;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,4 +47,19 @@ public class BaseActivity extends AppCompatActivity {
     public IlmApplication getIlmApplication() {
         return (IlmApplication) getApplication();
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    public void onEvent(){
+
+    }
+
 }

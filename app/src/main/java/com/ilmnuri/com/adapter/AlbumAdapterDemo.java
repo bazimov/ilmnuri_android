@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.ilmnuri.com.PlayActivity;
 import com.ilmnuri.com.R;
 import com.ilmnuri.com.event.AudioEvent;
@@ -135,7 +136,7 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
         }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         @Nullable
         @Bind(R.id.rl_item_album)
@@ -161,6 +162,8 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
         @Bind(R.id.progressBar)
         SeekBar mProgressBar;
 
+        Gson mGson;
+
         public ViewHolder(View itemView) {
             super(itemView);
             try {
@@ -169,11 +172,13 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
                 e.printStackTrace();
             }
             handler = new Handler();
+            mGson = new Gson();
         }
 
         @OnClick(R.id.rl_item_album)
         void clickItem() {
             Intent intent = new Intent(mContext, PlayActivity.class);
+            intent.putExtra("album_body", mGson.toJson(mAlbumModel));
             intent.putExtra("category", mAlbumModel.getCategory());
             intent.putExtra("url", mAlbumModel.getCategory() + "/" + mAlbumModel.getAlbum() + "/" + mAlbumModel.getAudios().get(getAdapterPosition()).getTrackName());
             mContext.startActivity(intent);
