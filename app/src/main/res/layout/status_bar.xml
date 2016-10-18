@@ -14,7 +14,8 @@
         android:background="@drawable/play_pause_notification"
         android:contentDescription="@string/app_name"
         android:backgroundTint="@color/background_gray1"
-        android:onClick="pause (PlayActivity)" />
+        android:onClick="pause (PlayActivity)"
+        tools:targetApi="lollipop" />
 
 
     <TextView
