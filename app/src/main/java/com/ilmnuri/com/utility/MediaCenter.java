@@ -13,29 +13,30 @@ import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
-import static com.ilmnuri.com.event.AudioEvent.start;
 
 public class MediaCenter {
 
     private static MediaCenter instance;
+    private Context mContext;
     private String audioPost;
 
     private MediaPlayer mediaPlayer;
     private int mPlaybackPosition;
     private int progress;
-    private boolean shouldDownload;
-    private boolean isPlaying;
+    public boolean shouldDownload;
+    public boolean isPlaying;
     private boolean isOffline;
     private ArrayList<String> listPath;
 
 
     private AudioManager mAudioManager;
     private Handler handler = new Handler();
+    private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
 
 
     private MediaCenter(Context context) {
-        Context mContext = context;
+        this.mContext = context;
 
 //        IShowApplication.getInstanse();
 //        if (databaseHelper != null) {
@@ -74,7 +75,6 @@ public class MediaCenter {
     public void forwardAudio() {
         int currentTime = mediaPlayer.getCurrentPosition();
 
-        int seekForwardTime = 5000;
         if (currentTime + seekForwardTime <= mediaPlayer.getDuration()) {
             mediaPlayer.seekTo(currentTime + seekForwardTime);
             mPlaybackPosition = mediaPlayer.getCurrentPosition();
@@ -144,7 +144,7 @@ public class MediaCenter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        EventBus.getDefault().post(start(audioPost));
+        EventBus.getDefault().post(AudioEvent.start(audioPost));
     }
 
     private void requestAudioFocus() {
@@ -200,7 +200,7 @@ public class MediaCenter {
         }
     }
 
-    private void closePlayer() {
+    public void closePlayer() {
         killMediaPlayer();
         EventBus.getDefault().post(AudioEvent.closePlayer());
     }
@@ -261,7 +261,7 @@ public class MediaCenter {
 //            updateProgress();
 
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
 
         }
     }
@@ -275,7 +275,7 @@ public class MediaCenter {
         return mediaPlayer.getCurrentPosition();
     }
 
-    private int progressToTimer(int progress, int totalDuration) {
+    public int progressToTimer(int progress, int totalDuration) {
         int currentDuration;
         totalDuration = (totalDuration / 1000);
         currentDuration = (int) ((((double) progress) / 100) * totalDuration);
@@ -283,7 +283,7 @@ public class MediaCenter {
         return currentDuration * 1000;
     }
 
-    private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+    AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
         @Override
         public void onAudioFocusChange(int focusChange) {
             switch (focusChange) {

@@ -136,7 +136,7 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
         }
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         @Nullable
         @Bind(R.id.rl_item_album)

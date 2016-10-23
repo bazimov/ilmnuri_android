@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -294,6 +295,12 @@ public class PlayActivity extends BaseActivity {
         durationHandler.postDelayed(updateSeekBarTime, 100);
     }
 
+    private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+//            killMediaPlayer();
+        }
+    };
     //handler to change seekBarTime
     private Runnable updateSeekBarTime = new Runnable() {
         public void run() {

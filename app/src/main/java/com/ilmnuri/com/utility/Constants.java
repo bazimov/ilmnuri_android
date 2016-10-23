@@ -31,7 +31,8 @@ public class Constants {
         try {
             bm = BitmapFactory.decodeResource(context.getResources(),
                     R.drawable.backimage, options);
-        } catch (Error | Exception ignored) {
+        } catch (Error ee) {
+        } catch (Exception e) {
         }
         return bm;
     }
