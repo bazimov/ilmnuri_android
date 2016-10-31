@@ -15,11 +15,6 @@ public class AudioEvent {
         return e;
     }
 
-    public static AudioEvent play() {
-        AudioEvent e = new AudioEvent();
-        e.type = Type.SHOW_NOTIFICATION;
-        return e;
-    }
 
     public static AudioEvent closePlayer() {
         AudioEvent e = new AudioEvent();
@@ -48,11 +43,7 @@ public class AudioEvent {
         e.url = url;
         return e;
     }
-    public static AudioEvent pause(){
-        AudioEvent e = new AudioEvent();
-        e.type = Type.PAUSE_NOTIFICATION;
-        return e;
-    }
+
 
     public static AudioEvent pause(String url){
         AudioEvent e = new AudioEvent();
@@ -92,13 +83,11 @@ public class AudioEvent {
     public enum Type {
         UPDATE,
         STOP,
-        SHOW_NOTIFICATION,
         START,
         PAUSE,
         FORWARD,
         BACKWARD,
         RESUME,
-        PAUSE_NOTIFICATION,
         CLOSE_PLAYER,
         PROGRESS
     }

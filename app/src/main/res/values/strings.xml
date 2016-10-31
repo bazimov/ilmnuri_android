@@ -31,4 +31,12 @@
     <string name="permission_denied">Telefon diskidan joy berilmagan. Nastroykadagi app managerdan ilmnurini topib diskdan joy berish tugmasini bosing yoki appni qaytadan yuklang. —Team com.ilmnuri</string>
     <string name="title_activity_web_view">Veb Sahifa</string>
     <string name="gcm_defaultSenderId">62662942053</string>
+
+    <string-array name="mp_main_titles">
+        <item>@string/mp.fragment.title.play_list</item>
+        <item>@string/mp.fragment.title.music</item>
+    </string-array>
+
+    <string name="mp.fragment.title.play_list">Play List</string>
+    <string name="mp.fragment.title.music">Music</string>
 </resources>

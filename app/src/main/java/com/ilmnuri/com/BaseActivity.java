@@ -15,7 +15,6 @@ import com.ilmnuri.com.utility.CacheUtils;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import de.greenrobot.event.EventBus;
 
 
 public class BaseActivity extends AppCompatActivity {

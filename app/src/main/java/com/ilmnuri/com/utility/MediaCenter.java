@@ -13,30 +13,27 @@ import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
 
-
 public class MediaCenter {
 
     private static MediaCenter instance;
-    private Context mContext;
     private String audioPost;
 
-    private MediaPlayer mediaPlayer;
+    public MediaPlayer mediaPlayer;
     private int mPlaybackPosition;
     private int progress;
-    public boolean shouldDownload;
-    public boolean isPlaying;
+    private boolean shouldDownload;
+    private boolean isPlaying;
     private boolean isOffline;
     private ArrayList<String> listPath;
 
 
     private AudioManager mAudioManager;
     private Handler handler = new Handler();
-    private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
 
 
     private MediaCenter(Context context) {
-        this.mContext = context;
+        Context mContext = context;
 
 //        IShowApplication.getInstanse();
 //        if (databaseHelper != null) {
@@ -75,6 +72,7 @@ public class MediaCenter {
     public void forwardAudio() {
         int currentTime = mediaPlayer.getCurrentPosition();
 
+        int seekForwardTime = 5000;
         if (currentTime + seekForwardTime <= mediaPlayer.getDuration()) {
             mediaPlayer.seekTo(currentTime + seekForwardTime);
             mPlaybackPosition = mediaPlayer.getCurrentPosition();
@@ -144,7 +142,7 @@ public class MediaCenter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        EventBus.getDefault().post(AudioEvent.start(audioPost));
+//        EventBus.getDefault().post(start(audioPost));
     }
 
     private void requestAudioFocus() {
@@ -161,7 +159,7 @@ public class MediaCenter {
             mediaPlayer.seekTo(mPlaybackPosition);
             mediaPlayer.start();
             handler.post(progressUpdateRunnable);
-            EventBus.getDefault().post(AudioEvent.resume(audioPost, progress));
+//            EventBus.getDefault().post(AudioEvent.resume(audioPost, progress));
         }
     }
 
@@ -177,7 +175,7 @@ public class MediaCenter {
 
         isPlaying = false;
         if (audioPost != null) {
-            EventBus.getDefault().post(AudioEvent.pause(audioPost));
+//            EventBus.getDefault().post(AudioEvent.pause(audioPost));
         }
     }
 
@@ -200,7 +198,7 @@ public class MediaCenter {
         }
     }
 
-    public void closePlayer() {
+    private void closePlayer() {
         killMediaPlayer();
         EventBus.getDefault().post(AudioEvent.closePlayer());
     }
@@ -243,7 +241,7 @@ public class MediaCenter {
             int cur = mediaPlayer.getCurrentPosition();
             if (dur > 0) {
                 progress = cur * 100 / dur;
-                EventBus.getDefault().post(AudioEvent.progress(audioPost, progress));
+//                EventBus.getDefault().post(AudioEvent.progress(audioPost, progress));
             }
         } catch (Exception e) {
             //
@@ -258,10 +256,10 @@ public class MediaCenter {
             mediaPlayer.seekTo(currentPosition);
             mPlaybackPosition = mediaPlayer.getCurrentPosition();
 
-//            updateProgress();
+            updateProgress();
 
 
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -275,7 +273,7 @@ public class MediaCenter {
         return mediaPlayer.getCurrentPosition();
     }
 
-    public int progressToTimer(int progress, int totalDuration) {
+    private int progressToTimer(int progress, int totalDuration) {
         int currentDuration;
         totalDuration = (totalDuration / 1000);
         currentDuration = (int) ((((double) progress) / 100) * totalDuration);
@@ -283,7 +281,7 @@ public class MediaCenter {
         return currentDuration * 1000;
     }
 
-    AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+    private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
         @Override
         public void onAudioFocusChange(int focusChange) {
             switch (focusChange) {
@@ -309,13 +307,4 @@ public class MediaCenter {
         }
     };
 
-
-
-    public boolean isShouldDownload() {
-        return shouldDownload;
-    }
-
-    public void setShouldDownload(boolean shouldDownload) {
-        this.shouldDownload = shouldDownload;
-    }
 }

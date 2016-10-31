@@ -47,7 +47,7 @@
                 android:orientation="horizontal">
 
                 <View
-                    android:id="@+id/media_rew"
+                    android:id="@+id/media_backward"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginLeft="14dp"
@@ -72,7 +72,7 @@
                     android:background="@drawable/custom_select_button"/>
 
                 <View
-                    android:id="@+id/media_ff"
+                    android:id="@+id/media_forward"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:layout_marginLeft="14dp"

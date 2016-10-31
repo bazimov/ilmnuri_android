@@ -158,7 +158,7 @@ public class AlbumActivity extends BaseActivity {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Bu darsni yuklab olishni xohlaysizmi?")
+        builder.setMessage("Bu darsni yuklab olishni xohlaysizmi? (faqat bir marta bosing...)")
                 .setPositiveButton("Albatta", dialogClickListener)
                 .setNegativeButton("Yo'q", dialogClickListener).show();
     }

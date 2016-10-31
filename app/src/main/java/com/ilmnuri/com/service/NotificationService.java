@@ -1,20 +1,19 @@
 package com.ilmnuri.com.service;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ilmnuri.com.PlayActivity;
@@ -25,125 +24,210 @@ import com.ilmnuri.com.model.Global;
 import com.ilmnuri.com.utility.Constants;
 import com.ilmnuri.com.utility.MediaCenter;
 
-import de.greenrobot.event.EventBus;
+import java.io.File;
 
+import de.greenrobot.event.EventBus;
 
 public class NotificationService extends Service {
 
     Notification status;
+    RemoteViews views;
     String gsonBody;
-    String url;
     private AlbumModel mAlbumModel;
-    Gson mGson;
-    NotificationManager mNotificationManager;
-    private int Notification_ID = 101;
-    MediaCenter mc;
+    private final String LOG_TAG = "NotificationService";
+    Gson gson;
+    String category, url, fileName;
+    File dir;
+    MediaCenter mediaCenter;
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
     @Override
     public void onCreate() {
         super.onCreate();
-        mGson = new Gson();
-        mc = MediaCenter.getInstance();
+        gson = new Gson();
+        mediaCenter = MediaCenter.getInstance();
+        dir = new File(Environment.getExternalStorageDirectory(), "/ilmnuri");
         EventBus.getDefault().register(this);
-      mNotificationManager  = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        gsonBody = intent.getStringExtra("album_body");
-        mAlbumModel = mGson.fromJson(gsonBody, new TypeToken<AlbumModel>() {
-        }.getType());
-        url = intent.getStringExtra("url");
 
         if (intent.getAction().equals(Constants.ACTION.STARTFOREGROUND_ACTION)) {
-            showNotification(true);
+            gsonBody = intent.getStringExtra("album_body");
+            category = intent.getStringExtra("category");
+            fileName = intent.getStringExtra("song_title");
+            url = intent.getStringExtra("url");
+            mAlbumModel = gson.fromJson(gsonBody, new TypeToken<AlbumModel>() {
+            }.getType());
+
+            showNotification();
+
+            Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
+
         } else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
+
             Toast.makeText(this, "Clicked Previous", Toast.LENGTH_SHORT).show();
+
+            Log.i(LOG_TAG, "Clicked Previous");
+
         } else if (intent.getAction().equals(Constants.ACTION.PLAY_ACTION)) {
-            Toast.makeText(this, "Clicked Play", Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(AudioEvent.play());
-        } else if (intent.getAction().equals(Constants.ACTION.CLOSE_ACTION)) {
-            stopForeground(true);
-            stopSelf();
-            EventBus.getDefault().post(AudioEvent.closePlayer());
-//            mNotificationManager.cancel(Notification_ID);
+
+            if (mediaCenter.isPlaying(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName)))) {
+                EventBus.getDefault().post(AudioEvent.pause(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName))));
+                Toast.makeText(this, "Pause", Toast.LENGTH_SHORT).show();
+            } else {
+                EventBus.getDefault().post(AudioEvent.resume(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName)), 1));
+                Toast.makeText(this, "Resume", Toast.LENGTH_SHORT).show();
+            }
+
+
+            Log.i(LOG_TAG, "Clicked Play");
+
+        } else if (intent.getAction().equals(Constants.ACTION.NEXT_ACTION)) {
+
+            Toast.makeText(this, "Clicked Next", Toast.LENGTH_SHORT).show();
+
+            Log.i(LOG_TAG, "Clicked Next");
         } else if (intent.getAction().equals(
+
                 Constants.ACTION.STOPFOREGROUND_ACTION)) {
+            EventBus.getDefault().post(AudioEvent.closePlayer());
+
+            Log.i(LOG_TAG, "Received Stop Foreground Intent");
+
             Toast.makeText(this, "Service Stoped", Toast.LENGTH_SHORT).show();
+
             stopForeground(true);
+
             stopSelf();
+            EventBus.getDefault().unregister(this);
         }
-
-
         return START_STICKY;
+
     }
 
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void showNotification(boolean isShown) {
+    private void showNotification() {
+        views = new RemoteViews(getPackageName(),
+                R.layout.status_bar);
 
+        views.setViewVisibility(R.id.status_bar_icon, View.VISIBLE);
+        views.setViewVisibility(R.id.status_bar_album_art, View.GONE);
 
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Intent notIntent = new Intent(this, PlayActivity.class);
-        notIntent.putExtra("album_body", mGson.toJson(mAlbumModel));
-        notIntent.putExtra("category", mAlbumModel.getCategory());
-        notIntent.putExtra("url", url);
+        Intent notificationIntent = new Intent(this, PlayActivity.class);
+        notificationIntent.putExtra("url", url);
+        notificationIntent.putExtra("album_body", gson.toJson(mAlbumModel));
+        notificationIntent.putExtra("category", category);
+        notificationIntent.setAction(Constants.ACTION.MAIN_ACTION);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                notificationIntent, 0);
 
-        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendInt = PendingIntent.getActivity(this, 0,
-                notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         Intent playIntent = new Intent(this, NotificationService.class);
         playIntent.setAction(Constants.ACTION.PLAY_ACTION);
-        PendingIntent pPlayIntent = PendingIntent.getService(this, 0, playIntent, 0);
+        PendingIntent pplayIntent = PendingIntent.getService(this, 0,
+                playIntent, 0);
+
 
         Intent closeIntent = new Intent(this, NotificationService.class);
-        closeIntent.setAction(Constants.ACTION.CLOSE_ACTION);
-        PendingIntent pCloseIntent = PendingIntent.getService(this, 0, closeIntent, 0);
+        closeIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+        PendingIntent pcloseIntent = PendingIntent.getService(this, 0,
+                closeIntent, 0);
 
+        views.setOnClickPendingIntent(R.id.status_bar_play, pplayIntent);
 
+        views.setOnClickPendingIntent(R.id.status_bar_collapse, pcloseIntent);
+        views.setTextViewText(R.id.status_bar_track_name, Global.getInstance().getCurrentPlayingSong());
+        views.setTextViewText(R.id.status_bar_artist_name, mAlbumModel.getAlbum());
 
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.status_bar);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            status = new Notification.Builder(this).build();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            views.setImageViewResource(R.id.status_bar_play, R.drawable.pause_jelly);
+            views.setImageViewResource(R.id.status_bar_collapse, R.drawable.ic_clear_black_24dp);
+            views.setTextColor(R.id.status_bar_track_name, R.color.black);
+            views.setTextColor(R.id.status_bar_artist_name, R.color.black);
+            status.contentView = views;
+//        status.bigContentView = bigViews;
+            status.flags = Notification.FLAG_ONGOING_EVENT;
+            status.icon = R.drawable.logo;
+            status.contentIntent = pendingIntent;
+            startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+        } else {
+            views.setImageViewResource(R.id.status_bar_play, android.R.drawable.ic_media_pause);
+            views.setImageViewResource(R.id.status_bar_collapse, R.drawable.ic_clear_white_24dp);
+            views.setTextColor(R.id.status_bar_track_name, R.color.white);
+            views.setTextColor(R.id.status_bar_artist_name, R.color.white);
+            status.contentView = views;
+//        status.bigContentView = bigViews;
+            status.flags = Notification.FLAG_ONGOING_EVENT;
+            status.icon = R.drawable.logo;
+            status.contentIntent = pendingIntent;
+            startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
 
+        }
 
-        remoteViews.setTextViewText(R.id.track_name, Global.getInstance().getCurrentPlayingSong());
-        remoteViews.setOnClickPendingIntent(R.id.notification_play, pPlayIntent);
-        remoteViews.setOnClickPendingIntent(R.id.close_status_bar, pCloseIntent);
-//        remoteViews.
-        builder.setContentIntent(pendInt)
-                .setContent(remoteViews)
-                .setSmallIcon(R.drawable.ic_attachment)
-                .setOngoing(false)
-                .setAutoCancel(false)
-                .setVisibility(isShown ? View.VISIBLE : View.GONE);
-
-        Notification notification = builder.build();
-
-
-        startForeground(10111, notification);
-//        views.setViewVisibility(R.id.status_bar_icon, View.VISIBLE);
     }
 
+    @Subscribe
+    public void onEventMainThread(AudioEvent event) {
+        if (event.getType() == AudioEvent.Type.PAUSE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                views.setImageViewResource(R.id.status_bar_play, R.drawable.play_jelly);
+                views.setImageViewResource(R.id.status_bar_collapse, R.drawable.ic_clear_black_24dp);
+                views.setTextColor(R.id.status_bar_track_name, R.color.black);
+                views.setTextColor(R.id.status_bar_artist_name, R.color.black);
+                status.contentView = views;
+                status.flags = Notification.FLAG_ONGOING_EVENT;
+                status.icon = R.drawable.logo;
+                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+            } else {
+                views.setImageViewResource(R.id.status_bar_play, android.R.drawable.ic_media_play);
+                views.setImageViewResource(R.id.status_bar_collapse, R.drawable.ic_clear_white_24dp);
+                views.setTextColor(R.id.status_bar_track_name, R.color.white);
+                views.setTextColor(R.id.status_bar_artist_name, R.color.white);
+                status.contentView = views;
+                status.flags = Notification.FLAG_ONGOING_EVENT;
+                status.icon = R.drawable.logo;
+                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
 
-    public void onEvent(AudioEvent event) {
-        if (event.getType() == AudioEvent.Type.SHOW_NOTIFICATION) {
-            showNotification(true);
+            }
+
+        } else if (event.getType() == AudioEvent.Type.RESUME) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                views.setImageViewResource(R.id.status_bar_play, R.drawable.pause_jelly);
+                views.setTextColor(R.id.status_bar_track_name, R.color.black);
+                status.contentView = views;
+                status.flags = Notification.FLAG_ONGOING_EVENT;
+                status.icon = R.drawable.logo;
+                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+            } else {
+                views.setImageViewResource(R.id.status_bar_play, android.R.drawable.ic_media_pause);
+                views.setTextColor(R.id.status_bar_track_name, R.color.white);
+                status.contentView = views;
+                status.flags = Notification.FLAG_ONGOING_EVENT;
+                status.icon = R.drawable.logo;
+                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, status);
+
+            }
         }
-//        else if (event.getType() == AudioEvent.Type.CLOSE_PLAYER) {
-//            showNotification(false);
-//        }
     }
 }
