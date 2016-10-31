@@ -76,7 +76,7 @@ public class NotificationService extends Service {
 
             showNotification();
 
-            Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Darslik boshlandi", Toast.LENGTH_SHORT).show();
 
         } else if (intent.getAction().equals(Constants.ACTION.PREV_ACTION)) {
 
@@ -109,7 +109,7 @@ public class NotificationService extends Service {
 
             Log.i(LOG_TAG, "Received Stop Foreground Intent");
 
-            Toast.makeText(this, "Service Stoped", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Darslik to'htatildi", Toast.LENGTH_SHORT).show();
 
             stopForeground(true);
 
