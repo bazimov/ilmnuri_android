@@ -86,7 +86,6 @@ public class PlayActivity extends BaseActivity {
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         initMediaPlayer();
         startService();
-        seekbar.setOnSeekBarChangeListener(seekBarChangeListener);
 
     }
 
@@ -190,12 +189,13 @@ public class PlayActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         tvTitle.setText(trackPath.replace(".mp3", "").replace("_", " "));
+        seekbar.setOnSeekBarChangeListener(seekBarChangeListener);
+
         loadImage();
     }
 
     private void loadImage() {
 
-//        String imageUrl = "";
         switch (currentCategory) {
             case 0:
                 imageView.setImageDrawable(getResources().getDrawable(R.drawable.ilm1));
@@ -220,7 +220,6 @@ public class PlayActivity extends BaseActivity {
         mediaCenter = MediaCenter.getInstance();
         mediaCenter.playAudio(String.valueOf(Uri.parse(dir.getPath() + "/" + fileName)));
         finalTime = mediaCenter.totalDuration();
-        seekbar.setMax((int) finalTime);
         play();
 
     }
@@ -260,13 +259,15 @@ public class PlayActivity extends BaseActivity {
         } else {
             btnStart.setBackgroundResource(R.drawable.pause_jelly);
         }
+        removeCallback();
         int position = MediaCenter.getInstance().getCurrentTimePosition();
         int total = MediaCenter.getInstance().totalDuration();
         if (position > 0) {
             progress = position * 100 / total;
         }
-        seekbar.setMax(mediaCenter.totalDuration());
+        seekbar.setProgress(progress);
         updateProgress();
+
     }
 
 
@@ -278,17 +279,41 @@ public class PlayActivity extends BaseActivity {
         durationHandler.postDelayed(mUpdateTimeTask, 100);
     }
 
+
+
+
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
             long totalDuration = MediaCenter.getInstance().totalDuration();
             long currentDuration = MediaCenter.getInstance().getCurrentTimePosition();
 
+//            current_time.setText("" + milliSecondsToTimer(currentDuration));
+
             duration.setText("" + milliSecondsToTimer(currentDuration));
             int progress = getProgressPercentage(currentDuration, totalDuration);
-            int mCurrentPosition = mediaCenter.getCurrentTimePosition() / 1000;
-            seekbar.setProgress(mCurrentPosition);
+            seekbar.setProgress(progress);
 
             durationHandler.postDelayed(this, 100);
+        }
+    };
+
+
+    SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//            updateProgressPosition(progress);
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            MediaCenter.getInstance().playCurrentPosition(seekBar);
+            updateProgress();
         }
     };
 
@@ -298,7 +323,7 @@ public class PlayActivity extends BaseActivity {
         long currentSeconds = (int) (currentDuration / 1000);
         long totalSeconds = (int) (totalDuration / 1000);
 
-        percentage = (((double) currentSeconds) / totalSeconds) * 100;
+        percentage = (((double) currentSeconds * 100) / totalSeconds);
 
         return percentage.intValue();
     }
@@ -325,37 +350,6 @@ public class PlayActivity extends BaseActivity {
         return finalTimerString;
     }
 
-    SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//            updateProgressPosition(progress);
-//            try {
-//                if (mediaCenter.isPlaying(fileName) || mediaCenter != null) {
-//                    if (fromUser)
-//                        mediaCenter.playCurrentPosition(seekBar);
-//                } else if (mediaCenter == null) {
-//                    Toast.makeText(getApplicationContext(), "Media is not running",
-//                            Toast.LENGTH_SHORT).show();
-//                    seekBar.setProgress(0);
-//                }
-//            } catch (Exception e) {
-//                Log.e("seek bar", "" + e);
-//                seekBar.setEnabled(false);
-//
-//            }
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            MediaCenter.getInstance().playCurrentPosition(seekBar);
-            updateProgress();
-        }
-    };
 
     @OnClick({R.id.media_backward, R.id.media_forward})
     void click(View view) {
