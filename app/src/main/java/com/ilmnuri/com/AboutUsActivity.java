@@ -39,7 +39,7 @@ public class AboutUsActivity extends AppCompatActivity {
                     "Alloh olayotgan ilmimizning nuri ila hayot yo'limizni munavvar qilsin!\n\n" +
                     "Texnik nosozliklar haqida bizga xabar qiling.\n\n" +
                     "e-mail: ilmnuri@ilmnuri.com\n\n" +
-                    "-- Ilmnuri faollari\nwww.ilmnuri.com\n\n3.3 versiya\n11/ 08/ 2016";
+                    "-- Ilmnuri faollari\nwww.ilmnuri.com\n\n3.4 versiya\n20/ 04/ 2017";
             tvAboutUs.setText(aboutUs);
         } catch (Exception e) {
             e.printStackTrace();
