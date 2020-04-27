@@ -4,10 +4,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -26,16 +26,16 @@ import com.ilmnuri.com.utility.Utils;
 import java.io.File;
 import java.lang.reflect.Type;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import de.greenrobot.event.EventBus;
 
 
 public class AlbumActivity extends BaseActivity {
 
 
-    @Bind(R.id.recyclerview)
+    @BindView(R2.id.recyclerview)
     RecyclerView mRecyclerView;
-    @Bind(R.id.tv_album_title)
+    @BindView(R2.id.tv_album_title)
     TextView tvTitle;
     private File dir;
 
