@@ -1,8 +1,8 @@
 package com.ilmnuri.com;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,7 +39,7 @@ public class AboutUsActivity extends AppCompatActivity {
                     "Alloh olayotgan ilmimizning nuri ila hayot yo'limizni munavvar qilsin!\n\n" +
                     "Texnik nosozliklar haqida bizga xabar qiling.\n\n" +
                     "e-mail: ilmnuri@ilmnuri.com\n\n" +
-                    "-- Ilmnuri faollari\nwww.ilmnuri.com\n\n3.4 versiya\n20/ 04/ 2017";
+                    "-- Ilmnuri faollari\nwww.ilmnuri.net\n\n3.5 versiya\n01/ 05/ 2020";
             tvAboutUs.setText(aboutUs);
         } catch (Exception e) {
             e.printStackTrace();

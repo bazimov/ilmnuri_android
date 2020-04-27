@@ -10,10 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +17,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.ilmnuri.com.event.AudioEvent;
 import com.ilmnuri.com.model.Api;
@@ -33,7 +34,7 @@ import com.ilmnuri.com.utility.Utils;
 
 import java.io.File;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
@@ -45,10 +46,10 @@ public class PlayActivity extends BaseActivity {
 
     public static final int DIALOG_DOWNLOAD_PROGRESS = 0;
 
-    @Bind(R.id.iv_play)
+    @BindView(R2.id.iv_play)
     ImageView imageView;
 
-    @Bind(R.id.tv_play_title)
+    @BindView(R2.id.tv_play_title)
     TextView tvTitle;
     private int currentCategory;
     private String trackPath;
@@ -56,14 +57,14 @@ public class PlayActivity extends BaseActivity {
     private String fileName;
     private File dir;
     boolean readExternalStoragePermission;
-    @Bind(R.id.songDuration)
+    @BindView(R2.id.songDuration)
     TextView duration;
-    @Bind(R.id.media_play)
+    @BindView(R2.id.media_play)
     View btnStart;
     private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
     private Handler durationHandler = new Handler();
-    @Bind(seekBar)
+    @BindView(seekBar)
     SeekBar seekbar;
     private String albumModel;
     private MediaCenter mediaCenter;

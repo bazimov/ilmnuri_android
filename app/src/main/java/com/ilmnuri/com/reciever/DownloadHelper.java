@@ -8,7 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -19,6 +19,7 @@ import com.ilmnuri.com.model.Audio;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Objects;
 
 import de.greenrobot.event.EventBus;
 
@@ -74,49 +75,45 @@ public class DownloadHelper extends Service {
             final long enqueue = downloadManager.enqueue(request);
 
             specialFeedItem.put(enqueue, mAudio);
-            specialFeedItem.get(enqueue).setDownloaded(false);
-            new Thread(new Runnable() {
+            Objects.requireNonNull(specialFeedItem.get(enqueue)).setDownloaded(false);
+            new Thread(() -> {
 
-                @Override
-                public void run() {
+                try {
+                    boolean downloading = true;
 
-                    try {
-                        boolean downloading = true;
+                    while (downloading) {
 
-                        while (downloading) {
+                        DownloadManager.Query q = new DownloadManager.Query();
+                        q.setFilterById(enqueue);
 
-                            DownloadManager.Query q = new DownloadManager.Query();
-                            q.setFilterById(enqueue);
-
-                            Cursor cursor = downloadManager.query(q);
-                            if (cursor.moveToFirst()) {
-                                if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                                    downloading = false;
-                                    if (specialFeedItem.get(enqueue) != null) {
-                                        Audio audio1 = specialFeedItem.get(enqueue);
-                                        specialFeedItem.get(enqueue).setDownloaded(true);
-                                        EventBus.getDefault().post(AudioEvent.stop_download(audio1));
-                                        counter++;
-                                    }
-
-                                } else {
-                                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
-                                        //Utils.showToast(DownloadHelper.this, "Yuklashda xatolik bo'ldi?");
-                                        Log.d("DownloadHelper", "Something went wrong download failed. bilmadim yana");
-                                    }
+                        Cursor cursor = downloadManager.query(q);
+                        if (cursor.moveToFirst()) {
+                            if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+                                downloading = false;
+                                if (specialFeedItem.get(enqueue) != null) {
+                                    Audio audio1 = specialFeedItem.get(enqueue);
+                                    Objects.requireNonNull(specialFeedItem.get(enqueue)).setDownloaded(true);
+                                    EventBus.getDefault().post(AudioEvent.stop_download(audio1));
+                                    counter++;
                                 }
-                                cursor.close();
+
+                            } else {
+                                if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
+                                    //Utils.showToast(DownloadHelper.this, "Yuklashda xatolik bo'ldi?");
+                                    Log.d("DownloadHelper", "Something went wrong download failed. bilmadim yana");
+                                }
                             }
-                        }
-                    } finally {
-                        if (specialFeedItem.size() == counter) {
-                            EventBus.getDefault().post(AudioEvent.update_download()
-                            );
-                            Log.d("Service ", " is done his job ");
+                            cursor.close();
                         }
                     }
-
+                } finally {
+                    if (specialFeedItem.size() == counter) {
+                        EventBus.getDefault().post(AudioEvent.update_download()
+                        );
+                        Log.d("Service ", " is done his job ");
+                    }
                 }
+
             }).start();
 
         }

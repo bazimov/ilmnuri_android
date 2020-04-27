@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -139,27 +139,27 @@ public class AlbumAdapterDemo extends RecyclerView.Adapter<AlbumAdapterDemo.View
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         @Nullable
-        @Bind(R.id.rl_item_album)
+        @BindView(R.id.rl_item_album)
         LinearLayout mLinearLayout;
 
         @Nullable
-        @Bind(R.id.tv_item_album)
+        @BindView(R.id.tv_item_album)
         TextView tvAlbumTitle;
 
         @Nullable
-        @Bind(R.id.btn_delete)
+        @BindView(R.id.btn_delete)
         ImageButton btnDelete;
 
         @Nullable
-        @Bind(R.id.btn_download)
+        @BindView(R.id.btn_download)
         ImageButton btnDownload;
 
         @Nullable
-        @Bind(R.id.audioSize)
+        @BindView(R.id.audioSize)
         TextView audioSize;
 
         @Nullable
-        @Bind(R.id.progressBar)
+        @BindView(R.id.progressBar)
         SeekBar mProgressBar;
 
         Gson mGson;
